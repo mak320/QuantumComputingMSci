@@ -122,12 +122,19 @@ result_F1 = F1 @ inintial_un * dt + inintial_un
 
 def progate_u():
 
-    def propogate_f(i, j):  # i and j are physical indicei
-        i = i % Nx # Apply periodic boundary condition for index ii
-        ii = (i - 1)   
+    def propogate_f(i, j):  # i and j are physical indiceis
+        ii = i - 1   
         ji = j - 1
         vj = (vmax - (j - 1) * dv) / dx
-        return vj * (f[(ii + 1) % Nx, ji] - f[ii - 1, ji]) / (2 * dt)
+
+        if i == 1: 
+            # f_{2, j} - f_{N_x, j} # shift all physical indicies back by 1
+            return vj * (f[1, ji] - f[Nx-1, ji]) / (2 * dt)
+        elif i == Nx:
+            # f_{1, j} - f_{N_x-1, j}
+            return vj * (f[0, ji] - f[Nx-2, ji]) / (2 * dt)
+        else:
+            return vj * (f[ii + 1, ji] - f[ii - 1, ji]) / (2 * dt)
 
     evolved_f = np.zeros((Nx, Nv))
     evolved_E_i = np.zeros(Nx)
