@@ -123,15 +123,11 @@ result_F1 = F1 @ inintial_un * dt + inintial_un
 def progate_u():
 
     def propogate_f(i, j):  # i and j are physical indicei
-        vj = (vmax - (j - 1) * dv) / dx
-        ii = i - 1
+        i = i % Nx # Apply periodic boundary condition for index ii
+        ii = (i - 1)   
         ji = j - 1
-        if i == 1:
-            return vj * (-3/2 * f[ii, ji] + 2 * f[ii+1, ji] - 1/2 * f[ii+2, ji])
-        elif i == Nx:
-            return vj * (3/2 * f[ii, ji] - 2 * f[ii-1, ji] + 1/2 * f[ii-2, ji])
-        else:
-            return vj * (-1/2 * f[ii-1, ji] + 1/2 * f[ii+1, ji])
+        vj = (vmax - (j - 1) * dv) / dx
+        return vj * (f[(ii + 1) % Nx, ji] - f[ii - 1, ji]) / (2 * dt)
 
     evolved_f = np.zeros((Nx, Nv))
     evolved_E_i = np.zeros(Nx)
@@ -149,44 +145,6 @@ def progate_u():
         evolved_E_i[i] = E_i[i] + c * (S + boundary) * dt
 
     return U_n_converter(evolved_f, evolved_E_i)
-
-
-def propogate_u_no_conversion():
-    """
-    implemented equation 5.16 directly form latex
-    """
-    evolved_un = np.zeros(Nx*(Nv+1))
-    for n in range(0, Nx*(Nv+1)):
-        n_phys = n + 1
-        pre_fact = (vmax - (ddslash(n_phys, Nv) - 1) * dv) / (dx)
-
-        if n_phys <= Nv:
-            du_dt = pre_fact * \
-                (-3/2 * inintial_un[n] + 2 * inintial_un[n +
-                 Nv] - 1/2 * inintial_un[n + 2*Nv])
-
-        elif Nv < n_phys and n_phys <= Nv*(Nx-1):
-            du_dt = pre_fact * \
-                (1/2 * inintial_un[n + Nv] - 1/2 * inintial_un[n - Nv])
-
-        elif n_phys > Nv*(Nx-1) and n_phys <= Nv*Nx:
-            du_dt = pre_fact * \
-                (3/2 * inintial_un[n] - 2 * inintial_un[n -
-                 Nv] + 1/2 * inintial_un[n - 2*Nv])
-
-        else:
-            S = 0
-            boundary = vmax/2 * (inintial_un[(ddslash(n_phys, max(Nx, Nv))-1)
-                                 * Nv + 1 - 1] - inintial_un[ddslash(n_phys, max(Nx, Nv))-1])
-            for j in range(1, Nv+1):
-                S += inintial_un[(ddslash(n_phys, max(Nx, Nv))-1)
-                                 * Nv + j - 1] * (-vmax + (j-1)*dv)
-
-            du_dt = c * (S + boundary)
-
-        evolved_un[n] = inintial_un[n] + du_dt * dt
-
-    return evolved_un
 
 
 result_direct = progate_u()
