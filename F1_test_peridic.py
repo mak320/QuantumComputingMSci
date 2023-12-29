@@ -1,7 +1,7 @@
 """
-Testing script for the F1 discretization
-Nov 11 2023
-
+Testing script for the F1 discretization with peridic boundary conditions
+Dec 29 2023
+Tamas fixing
 """
 
 import numpy as np
@@ -10,8 +10,9 @@ from math import ceil
 
 FontSize = 20
 # define paramters
-Nv = 10  # number of velocity points
+Nv = 3  # number of velocity points
 Nx = 10  # number of space points
+N = (Nv+1)*Nx
 
 dv = 1  # velocity step
 dx = 1  # space step
@@ -49,10 +50,9 @@ def U_n_converter(f_arr, E_arr):
 
 
 def create_F1_matrix():
-    F1 = np.zeros(((Nv+1)*Nx, (Nv+1)*Nx))
-    N = (Nv+1)*Nx
+    F1 = np.zeros((N,N))
 
-    for n in range(0, (Nv+1)*Nx):
+    for n in range(0, N):
         n_phys = n + 1
         v_nddNv = -vmax + (ddslash(n_phys, Nv) - 1) * dv
 
@@ -61,21 +61,18 @@ def create_F1_matrix():
         if n_phys <= Nv:
             for k1 in range(0, N):
                 k1_phys = k1 + 1
-                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) +
-                                        kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
+                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) - kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
 
         elif n_phys > Nv and n_phys <= Nv*(Nx-1):
             for k2 in range(0, N):
                 k2_phys = k2 + 1
                 F1[n, k2] = pre_fact * \
-                    (kron_delta(k2_phys, n_phys + Nv) -
-                     kron_delta(k2_phys, n_phys - Nv))
+                    (kron_delta(k2_phys, n_phys + Nv) - kron_delta(k2_phys, n_phys - Nv))
 
         elif n_phys > Nv*(Nx-1) and n_phys <= Nv*Nx:
             for k3 in range(0, N):
                 k3_phys = k3 + 1
-                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys -
-                                        Nv * (Nx-1)) + kron_delta(k3_phys, n_phys - Nv))
+                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys - Nv * (Nx-1)) - kron_delta(k3_phys, n_phys - Nv))
 
         else:
             for k in range(0, (Nv+1)*Nx):
@@ -177,53 +174,6 @@ ax1.plot(x_axis, result_direct, 'o', color='red',
 
 ax1.set_ylabel(r"$u_n$", fontsize=FontSize)
 ax1.legend(fontsize=FontSize)
-
-
-# S = 0
-# i = 1
-# boudnary = vmax/2 * (f[i-1, 0] - f[i-1, Nv-1])
-# for j in range(0, Nv):
-#     j_phys = j + 1
-#     S += (f[i-1, j] * (-vmax + (j_phys-1) *dv))
-
-# dE_dt  = c * (S + boudnary)
-
-# evolved_E = E_i[i-1] + dE_dt * dt
-
-# plt.plot(Nx*Nv+i-1, evolved_E, "*", color="orange")
-
-
-"""testing the 1st segment"""
-# m=5
-# du_dt = (vmax - (ddslash(m,Nv) -1)*dv) * (-3/2 * inintial_un[m-1] + 2 * inintial_un[m-1+Nv] - 1/2 * inintial_un[m-1 + 2*Nv])
-# evolved_un = inintial_un[m-1] + du_dt * dt
-# plt.plot(m-1, evolved_un, "*", color="orange")
-
-
-"""testing the 2nd segment"""
-# m = 45
-# du_dt = (vmax - (ddslash(m,Nv) -1)*dv) * (1/2 * inintial_un[m + Nv -1] - 1/2 * inintial_un[m-1 - Nv])
-# evolved_un = inintial_un[m-1] + du_dt * dt
-# plt.plot(m-1, evolved_un, "*", color="orange")
-
-
-"""testing the 3rd segment"""
-# m = 50
-# du_dt = (vmax - (ddslash(m,Nv) -1)*dv) * (3/2 * inintial_un[m-1] - 2 * inintial_un[m-1 - Nv] + 1/2 * inintial_un[m-1 - 2*Nv])
-# evolved_un = inintial_un[m-1] + du_dt * dt
-# plt.plot(m-1, evolved_un, "*", color="orange")
-
-
-"""testing the 4th segment (electric field)"""
-# m = Nx * Nv + i
-# S = 0
-# boundary = vmax/2 * (inintial_un[(ddslash(m, Nv)-1)*Nv + 1 - 1] - inintial_un[ddslash(m, Nv)-1])
-# for j in range(1, Nv+1):
-#     S +=  inintial_un[(ddslash(m, Nv)-1)*Nv + j - 1] * (-vmax + (j-1)*dv)
-
-# du_dt = c * (S + boundary)
-# evolved_un = inintial_un[m-1] + du_dt * dt
-# plt.plot(m-1, evolved_un, "*", color="red", ms = 10, alpha=0.5)
 
 error = np.abs(result_F1 - result_direct) / inintial_un
 
