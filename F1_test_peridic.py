@@ -10,7 +10,7 @@ from math import ceil
 
 FontSize = 20
 # define paramters
-Nv = 3  # number of velocity points
+Nv = 10  # number of velocity points
 Nx = 10  # number of space points
 N = (Nv+1)*Nx
 

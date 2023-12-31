@@ -30,48 +30,54 @@ def kron_delta(a, b):
 
 
 
-def create_F1_matrix(Nv, Nx, vmax, dx, dv):
-    F1 = np.zeros(((Nv+1)*Nx, (Nv+1)*Nx))
+def create_F1_matrix():
+    F1 = np.zeros((N,N))
 
-    for n in range(0, (Nv+1)*Nx):
+    for n in range(0, N):
         n_phys = n + 1
-        pre_fact = (vmax - (ddslash(n_phys, Nv) - 1) * dv) / dx
+        v_nddNv = -vmax + (ddslash(n_phys, Nv) - 1) * dv
+
+        pre_fact = - v_nddNv / (2 * dx)
 
         if n_phys <= Nv:
-            for k1 in range(0, (Nv+1)*Nx):
+            for k1 in range(0, N):
                 k1_phys = k1 + 1
-                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) +kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
+                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) - kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
 
         elif n_phys > Nv and n_phys <= Nv*(Nx-1):
-            for k2 in range(0, (Nv+1)*Nx):
+            for k2 in range(0, N):
                 k2_phys = k2 + 1
-                F1[n, k2] = pre_fact * (kron_delta(k2_phys, n_phys + Nv) - kron_delta(k2_phys, n_phys - Nv))
+                F1[n, k2] = pre_fact * \
+                    (kron_delta(k2_phys, n_phys + Nv) - kron_delta(k2_phys, n_phys - Nv))
 
         elif n_phys > Nv*(Nx-1) and n_phys <= Nv*Nx:
-            for k3 in range(0, (Nv+1)*Nx):
+            for k3 in range(0, N):
                 k3_phys = k3 + 1
-                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys - Nv * (Nx -1)) + kron_delta(k3_phys, n_phys - Nv))
+                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys - Nv * (Nx-1)) - kron_delta(k3_phys, n_phys - Nv))
 
         else:
             for k in range(0, (Nv+1)*Nx):
                 k_phys = k + 1
-                S = 0 
-                for j in range(1, Nv+1): # here j is a physical index
-            
+                S = 0
+                for j in range(1, Nv+1):  # here j is a physical index
+                    v_j = -vmax + (j - 1) * dv
                     # S += kron_delta(k_phys, (ddslash(n_phys, Nv) - 1) * Nv + j) * (-vmax + (j - 1) * dv)
-                    S += kron_delta(k_phys, (n_phys -Nx * Nv - 1)*Nv + j) * (-vmax + (j - 1) * dv)
+                    S += kron_delta(k_phys, (n_phys - Nx *
+                                    Nv - 1) * Nv + j) * v_j
 
-                #boundary = (vmax/2)  * (kron_delta(k_phys, (ddslash(n_phys, Nv) - 1) * Nv + 1) - kron_delta(k_phys, ddslash(n_phys, Nv)))
-                boundary = (vmax/2)  * (kron_delta(k_phys, (n_phys -Nx * Nv - 1)*Nv + 1) - kron_delta(k_phys, (n_phys -Nx * Nv - 1)*Nv + Nv))
+                # boundary = (vmax/2)  * (kron_delta(k_phys, (ddslash(n_phys, Nv) - 1) * Nv + 1) - kron_delta(k_phys, ddslash(n_phys, Nv)))
+                boundary = (vmax/2) * (kron_delta(k_phys, (n_phys - Nx * Nv - 1)
+                                                  * Nv + 1) - kron_delta(k_phys, (n_phys - Nx * Nv - 1)*Nv + Nv))
 
-                F1[n, k] = c * ( S + boundary)
+                F1[n, k] = c * (S + boundary)
     return F1
 
 eigenvals = []
 for Nx in Nx_arr:
     for Nv in Nv_arr:
         vmax = (Nv-1) * dv /2 
-        F1 = create_F1_matrix(Nv, Nx, vmax, dx, dv)
+        N = (Nv+1)*Nx
+        F1 = create_F1_matrix()
         lamda = np.linalg.eigvals(F1)
         lamda_max  = max(lamda.real)
         eigenvals.append(lamda_max)
