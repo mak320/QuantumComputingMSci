@@ -37,7 +37,6 @@ def vj(j):
     return -vmax + (j-1) * dv
 
 def create_F1_hat():
-    N = (Nv+1)*Nx
     F1_regular = np.zeros((N,N))
     F1_gauss = np.zeros((N,N))
 

@@ -61,18 +61,20 @@ def create_F1_matrix():
         if n_phys <= Nv:
             for k1 in range(0, N):
                 k1_phys = k1 + 1
-                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) - kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
+                F1[n, k1] = pre_fact * (kron_delta(k1_phys, n_phys + Nv) - 
+                                        kron_delta(k1_phys, n_phys + Nv * (Nx-1)))
 
         elif n_phys > Nv and n_phys <= Nv*(Nx-1):
             for k2 in range(0, N):
                 k2_phys = k2 + 1
-                F1[n, k2] = pre_fact * \
-                    (kron_delta(k2_phys, n_phys + Nv) - kron_delta(k2_phys, n_phys - Nv))
+                F1[n, k2] = pre_fact * (kron_delta(k2_phys, n_phys + Nv) -
+                                        kron_delta(k2_phys, n_phys - Nv))
 
         elif n_phys > Nv*(Nx-1) and n_phys <= Nv*Nx:
             for k3 in range(0, N):
                 k3_phys = k3 + 1
-                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys - Nv * (Nx-1)) - kron_delta(k3_phys, n_phys - Nv))
+                F1[n, k3] = pre_fact * (kron_delta(k3_phys, n_phys - Nv * (Nx-1)) - 
+                                        kron_delta(k3_phys, n_phys - Nv))
 
         else:
             for k in range(0, (Nv+1)*Nx):
