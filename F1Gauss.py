@@ -6,7 +6,7 @@ FontSize = 20
 # define paramters
 Nv = 10  # number of velocity points
 Nx = 10  # number of space points
-N = (Nv+1)*Nx
+N = Nv*Nx
 
 dv = 1  # velocity step
 dx = 1  # space step
