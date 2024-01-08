@@ -23,7 +23,7 @@ vmax = (Nv-1) * dv / 2  # maximum velocity (not independent)
 
 q = 1  # charge
 m= 1 # mass 
-eps_0 = 1  # permittivity
+eps_0 = 10  # permittivity
 N_particles = 1
 
 
@@ -106,13 +106,13 @@ f_init = np.random.rand(Nx, Nv)
 dt = 1
 # f = np.ones((Nx, Nv))
 
-# f_init = np.zeros((Nx, Nv))
-# for i in range(0, Nx):
-#     for j in range(0, Nv):
-#         if i % 2 == 0: # ha a sor vagy oszlop paros
-#             f_init[i, j] = 1
-#         else:
-#             f_init[i, j] = 2
+f_init = np.zeros((Nx, Nv))
+for i in range(0, Nx):
+    for j in range(0, Nv):
+        if i % 2 == 0: # ha a sor vagy oszlop paros
+            f_init[i, j] = 1
+        else:
+            f_init[i, j] = 2
 
 f_init = f_init * N_particles / (np.sum(f_init) * (Nx-1) * dx * (Nv-1) * dv)
 
@@ -120,7 +120,7 @@ plt.title("Initial distribution")
 
 plt.imshow(f_init, cmap="plasma")
 plt.colorbar()
-
+plt.show()
 
 def u_n(f):
     un = np.zeros(N)
@@ -163,7 +163,7 @@ def dfdt(f):
 
             if j_phys == Nv:
                 # 0 - f_{i, N_v-1} 
-                dfdv_term[i, j] = prefact_gauss * (-f[i, Nv-2]) / (2 * dv)
+                dfdv_term[i, j] = prefact_gauss * (-f[i, Nv-2]) / (2 * dv) ## egyesevel vegig neztem 
             else:
                 dfdv_term[i, j] = prefact_gauss * (f[i, j+1] - f[i, j-1]) / (2 * dv)
             
